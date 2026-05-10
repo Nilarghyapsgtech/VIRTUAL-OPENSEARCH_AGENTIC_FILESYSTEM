@@ -1,6 +1,8 @@
-# OpenSearchFS FastAPI
 
 Agent-facing virtual filesystem over OpenSearch.
+<img width="8191" height="2777" alt="image" src="https://github.com/user-attachments/assets/c7c70ee2-b35c-44a4-8012-3e224bf2f2b4" />
+
+
 
 The agent sends bash-like commands to a FastAPI service. The service does not execute real bash. It parses a restricted command set and translates read-only filesystem operations into OpenSearch reads and searches.
 
