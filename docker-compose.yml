@@ -1,0 +1,51 @@
+services:
+  opensearch:
+    image: opensearchproject/opensearch:2.19.1
+    container_name: osfs-opensearch
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - OPENSEARCH_JAVA_OPTS=-Xms1g -Xmx1g
+      - bootstrap.memory_lock=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - "9200:9200"
+      - "9600:9600"
+    volumes:
+      - osfs-opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  api:
+    build: .
+    container_name: osfs-api
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    environment:
+      OPENSEARCH_URL: http://opensearch:9200
+      OPENSEARCH_USERNAME: ""
+      OPENSEARCH_PASSWORD: ""
+      OPENSEARCH_VERIFY_CERTS: "false"
+      OSFS_INDEX_PREFIX: osfs
+      OSFS_DEFAULT_TENANT: demo
+      OSFS_DEFAULT_COLLECTION: docs
+      OSFS_DEFAULT_PRINCIPALS: group:public
+      OSFS_ENABLE_LOCAL_INGEST: "true"
+      OSFS_INGEST_BASE_DIR: /data/ingest
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./sample_docs:/data/ingest/sample_docs:ro
+
+volumes:
+  osfs-opensearch-data:
